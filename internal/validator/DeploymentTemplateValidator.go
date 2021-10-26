@@ -73,7 +73,7 @@ func DeploymentTemplateValidate(templatejson interface{}, schemafile string) (bo
 
 	sugaredLogger := util.NewSugardLogger()
 	pwd, _ := os.Getwd()
-	if _, err := os.Stat(fmt.Sprintf("%s/schema/%s.json", pwd,schemafile)); err == nil {
+	if filestatus, err := os.Stat(fmt.Sprintf("%s/schema/%s.json", pwd,schemafile)); err == nil {
 		gojsonschema.FormatCheckers.Add("cpu", CpuChecker{})
 		gojsonschema.FormatCheckers.Add("memory", MemoryChecker{})
 
@@ -176,6 +176,9 @@ func DeploymentTemplateValidate(templatejson interface{}, schemafile string) (bo
 			return false, errors.New(stringerror)
 		}
 	}else {
+		fmt.Println(filestatus,"filestatus")
 		return true,nil
 	}
+
+
 }
