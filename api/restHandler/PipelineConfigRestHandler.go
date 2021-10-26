@@ -1279,7 +1279,6 @@ func (handler PipelineConfigRestHandlerImpl) UpdateAppOverride(w http.ResponseWr
 	}
 
 	ChartVersion := templateRequest.RefChartTemplate
-	fmt.Println(ChartVersion,"ChartVersion")
 	validate, error := validator2.DeploymentTemplateValidate(templateRequest.ValuesOverride, ChartVersion)
 	if !validate {
 			fmt.Println("Values are incorrect", error)
