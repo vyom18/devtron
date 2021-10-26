@@ -72,13 +72,14 @@ const memory = "memory"
 func DeploymentTemplateValidate(templatejson interface{}, schemafile string) (bool, error) {
 
 	sugaredLogger := util.NewSugardLogger()
-	if _, err := os.Stat(fmt.Sprintf("schema/%s.json", schemafile)); err == nil {
+	pwd, _ := os.Getwd()
+	if _, err := os.Stat(fmt.Sprintf("%s/schema/%s.json", pwd,schemafile)); err == nil {
 		gojsonschema.FormatCheckers.Add("cpu", CpuChecker{})
 		gojsonschema.FormatCheckers.Add("memory", MemoryChecker{})
 
-		jsonFile, err := os.Open(fmt.Sprintf("schema/%s.json", schemafile))
+		jsonFile, err := os.Open(fmt.Sprintf("%s/schema/%s.json", pwd,schemafile))
 		if err != nil {
-			sugaredLogger.Errorw("scheme file error", err)
+			sugaredLogger.Error(err)
 		}
 		byteValueJsonFile, _ := ioutil.ReadAll(jsonFile)
 		var schemajson map[string]interface{}
@@ -87,22 +88,23 @@ func DeploymentTemplateValidate(templatejson interface{}, schemafile string) (bo
 		documentLoader := gojsonschema.NewGoLoader(templatejson)
 		marshalTemplatejson, err := json.Marshal(templatejson)
 		if err != nil {
-			sugaredLogger.Errorw("Error in marshalling templatejson",err)
+
+			sugaredLogger.Error(err)
+
 			return false, err
 		}
 		result, err := gojsonschema.Validate(schemaLoader, documentLoader)
 		if err != nil {
-			sugaredLogger.Errorw("Error in gojsonschema validation",err)
+			sugaredLogger.Error(err)
 			return false, err
 		}
 		if result.Valid() {
 			var dat map[string]interface{}
 
 			if err := json.Unmarshal(marshalTemplatejson, &dat); err != nil {
-				sugaredLogger.Errorw("Error in unmarshal templatejson",err)
+				sugaredLogger.Error(err)
 				return false, err
 			}
-			//limits and requests are mandatory fields in schema
 			autoscaleEnabled,ok := dat["autoscaling"].(map[string]interface{})["enabled"]
 			if ok && autoscaleEnabled.(bool) {
 				checkCPUlimit,ok := dat["resources"].(map[string]interface{})["limits"].(map[string]interface{})["cpu"]
