@@ -78,31 +78,28 @@ func DeploymentTemplateValidate(templatejson interface{}, schemafile string) (bo
 
 		jsonFile, err := os.Open(fmt.Sprintf("schema/%s.json", schemafile))
 		if err != nil {
-			sugaredLogger.Error(err)
+			sugaredLogger.Errorw("scheme file error", err)
 		}
 		byteValueJsonFile, _ := ioutil.ReadAll(jsonFile)
 		var schemajson map[string]interface{}
 		json.Unmarshal([]byte(byteValueJsonFile), &schemajson)
 		schemaLoader := gojsonschema.NewGoLoader(schemajson)
 		documentLoader := gojsonschema.NewGoLoader(templatejson)
-		buff, err := json.Marshal(templatejson)
+		marshalTemplatejson, err := json.Marshal(templatejson)
 		if err != nil {
-
-			sugaredLogger.Error(err)
-
+			sugaredLogger.Errorw("Error in marshalling templatejson",err)
 			return false, err
 		}
-		fmt.Println(string(buff))
 		result, err := gojsonschema.Validate(schemaLoader, documentLoader)
 		if err != nil {
-			sugaredLogger.Error(err)
+			sugaredLogger.Errorw("Error in gojsonschema validation",err)
 			return false, err
 		}
 		if result.Valid() {
 			var dat map[string]interface{}
 
-			if err := json.Unmarshal(buff, &dat); err != nil {
-				sugaredLogger.Error(err)
+			if err := json.Unmarshal(marshalTemplatejson, &dat); err != nil {
+				sugaredLogger.Errorw("Error in unmarshal templatejson",err)
 				return false, err
 			}
 			//limits and requests are mandatory fields in schema
@@ -161,11 +158,9 @@ func DeploymentTemplateValidate(templatejson interface{}, schemafile string) (bo
 
 			}
 
-			fmt.Println("ok")
 			return true, nil
 		} else {
 			var stringerror string
-			fmt.Printf("The document is not valid. see errors :\n")
 			for _, err := range result.Errors() {
 				fmt.Println(err.Details()["format"])
 				if err.Details()["format"] == cpu {
