@@ -69,7 +69,7 @@ func GetErrorOrNil(errs []string) error {
 }
 
 func ExtractChartVersion(chartVersion string) (int, int, error) {
-	if len(chartVersion) == 0 {
+	if chartVersion == "" {
 		return 0, 0, nil
 	}
 	chartVersions := strings.Split(chartVersion, ".")

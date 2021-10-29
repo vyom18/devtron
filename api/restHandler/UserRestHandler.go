@@ -21,6 +21,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
+	"strconv"
+	"strings"
+
 	"github.com/devtron-labs/devtron/api/bean"
 	"github.com/devtron-labs/devtron/client/pubsub"
 	"github.com/devtron-labs/devtron/internal/util"
@@ -31,9 +35,6 @@ import (
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
 	"gopkg.in/go-playground/validator.v9"
-	"net/http"
-	"strconv"
-	"strings"
 )
 
 type UserRestHandler interface {
@@ -118,7 +119,7 @@ func (handler UserRestHandlerImpl) CreateUser(w http.ResponseWriter, r *http.Req
 			return
 		}
 
-		if groupRoles != nil && len(groupRoles) > 0 {
+		if len(groupRoles) > 0 {
 			for _, groupRole := range groupRoles {
 				if len(groupRole.Team) > 0 {
 					if ok := handler.enforcer.Enforce(token, rbac.ResourceUser, rbac.ActionCreate, strings.ToLower(groupRole.Team)); !ok {
@@ -210,7 +211,7 @@ func (handler UserRestHandlerImpl) applyAuthentication(token string, newRoleFilt
 		if ok := handler.enforcer.Enforce(token, rbac.ResourceGlobalEnvironment, rbac.ActionGet, strings.ToLower(filter.Environment)); !ok {
 			pass = pass + 1
 		}
-		if pass != 2 {
+		if pass == 2 {
 			combinedRoleFilters = append(combinedRoleFilters, filter)
 		}
 	}
@@ -256,7 +257,7 @@ func (handler UserRestHandlerImpl) UpdateUser(w http.ResponseWriter, r *http.Req
 			return
 		}
 
-		if groupRoles != nil && len(groupRoles) > 0 {
+		if len(groupRoles) > 0 {
 			for _, groupRole := range groupRoles {
 				if len(groupRole.Team) > 0 {
 					if ok := handler.enforcer.Enforce(token, rbac.ResourceUser, rbac.ActionUpdate, strings.ToLower(groupRole.Team)); !ok {

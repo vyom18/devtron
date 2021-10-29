@@ -1222,7 +1222,7 @@ func (handler PipelineConfigRestHandlerImpl) GetArtifactsByCDPipeline(w http.Res
 				if err != nil {
 					handler.Logger.Errorw("service err, GetArtifactsByCDPipeline", "err", err, "cdPipelineId", cdPipelineId, "stage", stage)
 				}
-				if blockCveList != nil && len(blockCveList) > 0 {
+				if len(blockCveList) > 0 {
 					vulnerableMap[digest] = true
 				}
 			}
